@@ -1,0 +1,318 @@
+###################################
+###### DATA WRANGLING IN R ########
+########### NICAR 2016 ############
+######### CAELAINN BARR ###########
+######### THE GUARDIAN ############
+###################################
+
+################################
+## QUICK INTRO TO R & RSTUDIO ##
+################################
+
+#R is a programming language and open-source statistical programming tool 
+#It can be used for data analysis, visualsing data and developing software
+#We're going to use RStudio where you can see your data and commands in 4 panels
+#The four panels are the console, where you execute commands; 
+#A history panel; a workspace for display and a file/plot space
+
+#You can use the console like a calculator
+5+8
+
+3*123
+
+sqrt(100)
+
+#You can also save the results by assigning them to an object 
+
+x <- 3*123
+
+x
+
+#You can also create ordered lists of numbers, called vectors and assign them to variables
+
+y <- 1:10
+
+y
+
+#This is an R script
+#It allows you to save all the changes you have made in R
+#That way you can check and reproduce your work
+#The biggest favour to future you is to comment that script comprehensively and clearly
+
+#We have just opened a project in RStudio, "Data Wrangling NICAR 16"
+#In a project you can keep all your scripts, files and analysis in one place
+
+###############################
+## LOADING DATA INTO RSTUDIO ##
+###############################
+
+#There is some data already in our project, see the file panel
+
+#The data named DE_EDHIW and DE_PILW is from a group called LIS
+#Earlier this week the Guardian published a series on income inequality
+#However rather than focus on income inequality be deciles we looked by generation
+#This intergenerational analysis looks at disposable income and wages
+#Here we are just going to look at the data for Germany
+
+#Let's load one of the csv files into R 
+read.csv("DE_EDHIW.csv") 
+
+#We also want to assign a unique name to the file
+#And determine the class of the contents...
+de_edhiw <- read.csv("DE_EDHIW.csv",colClasses=c(Survey="character", Age="character", rep("numeric",5)))
+
+#We're using relatively clean data here
+#In general avoid making changes to your underlying data in R
+#The program is wonderful for replicating your work
+#But clean in Excel or elsewhere and import the data you want to work with
+
+#There are also ways to load other file types into R
+
+#If the separator is a tab, ie an Excel file, use this format...
+# read.table() or read.csv()
+# df <- read.table("<FileName>.txt",		
+#                  header = FALSE)			  
+#
+#If the separator is a comma, you can use this format...
+# df <- read.table("<FileName>.csv",		
+#                  header = FALSE,
+#                  sep = ",")
+#
+#In our previous examples we had no problem with headers
+#The default is to treat the first row as a header
+
+#####################################
+## GETTING FAMILIAR WITH YOUR DATA ##
+#####################################
+
+#Now the data is loaded and assigned to an object we can print the dataset in our console
+de_edhiw
+
+#Or, even better, we can call up the dataset in our work area
+View(de_edhiw)
+
+#Take a look at the data, what do you think it relates to?
+#Let's look quickly at some of the dimensions of the data
+
+#How many rows and columns does the data have?
+dim(de_edhiw)
+
+#What do the first 6 rows of data look like?
+head(de_edhiw)
+
+#What do the last 6 rows of data look like?
+tail(de_edhiw)
+
+#What are the column names?
+names(de_edhiw)
+
+#How many rows are in the dataset?
+nrow(de_edhiw)
+
+#How many columns are in the dataset?
+ncol(de_edhiw)
+
+###################
+###PACKAGES IN R###
+###################
+
+#Packages in R are wonderful tools that can allow you do amazing things!
+#To explore all the packages available
+library()
+
+#To look at the list of packages currently loaded in R
+#You can look at the "Packages" tab or try
+search()
+
+#To install a package, like dplyr
+install.packages("dplyr")
+
+#You alsp need to call the package from the library to use
+library("dplyr")
+
+#Note you need to call the package using "", ie "dplyr"
+#This is one of R's quirks
+
+#######################################
+## GETTING STUCK INTO ANALYSING DATA ##
+#######################################
+
+#Two packages will be your best allies in analysing data 
+#These are dplyr, which we've just installed, and tidyr
+#In order to use them we need install and load the packages
+
+#Now let's install tidyr
+#Flex those fingers...
+
+#To use the package we need to call it from the library
+
+#Now we have the data and packages loaded, let's play with the data
+#For those of you familiar with Excel, this will be easy!
+
+#Let's sort the data, high to low
+arrange(de_edhiw,EDHIW)
+
+#As you can see the sort prints the results to the console
+#But let's take a look in the table format...
+View(arrange(de_edhiw,EDHIW))
+
+#Let's mix it up and sort in the other direction
+arrange(de_edhiw,desc(EDHIW))
+
+#Now I want you to look type in the command to view the data in descending order
+#But this time bring up the results in the table panel...
+#Now let's do that by assigning the view to "de_edhiw_small" (hint <-)
+#Now let's call it up in the data frame environment
+
+#Let's look at filtering
+#What if I don't want to see all the age groups?
+#Let's say I only want to see people 80 years and over
+#We can subset the data using grep
+#grep searches for a string of matching characters
+de_edhiw[grep("80 years and over", de_edhiw$Age), ]
+#What's happening in the above command...
+
+#This time let's also assign the subset to an object so we can recall it
+de_edhiw_80 <- de_edhiw[grep("80 years and over", de_edhiw$Age), ]
+View(de_edhiw_80)
+  
+#Now pull the subset for 25 to 29 year olds
+#Assign it to a unique name too..
+
+#There are other ways of filtering too
+#filter is part of the dplyr package 
+filter(de_edhiw, Age == "80 years and over")
+
+#Here are some of the logical operators that can be used with filter
+# < Less than 
+# > Greater than
+# == Equal to
+# != Not Equal to
+# <= Less than or equal to
+# >= Greater than or equal to
+# | Or
+# & And
+# %in% Group membership
+# is.na Is NA
+
+##################
+##COMBINING DATA##
+##################
+
+#So we have a dataset we have been working with 
+#But the LIS has just given use a new dataset
+#Let's load the data set in and look at it
+de_edhiw_10 <- read.csv("DE_EDHIW_10.csv")
+
+#Take a look at the data
+View(de_edhiw_10)
+
+#The structure is exactly the same as the existing dataset
+#The column headers match up so let's append the rows
+#We'll use bind_rows, a function of dplyr
+
+all_de <- bind_rows(de_edhiw,de_edhiw_10)
+View(all_de)
+
+#Tip - Columns don't need to match when using row bind
+#You can bind rows by dropping some columns
+#bind_rows(data.frame(x = 1:3), data.frame(y = 1:4))
+
+#So now we have the complete dataset for EDHIW
+
+#BUT there's more...
+#Now you have a new variable called PILW that you need to add
+#It's the personal labour from income in Germany for the same years and the same age cohorts
+
+#Let's load in the data and take a look
+de_pilw <- read.csv("DE_PILW.csv")
+View(de_pilw)
+de_pilw <- read.csv("DE_PILW.csv",colClasses=c(Survey="character", Age="character", rep("numeric",5)))
+
+#We want to join the datasets but take a closer look at the order...
+#We need to join the data based on the Survey and Age columns
+#In order to do that we need a new column
+#Lets use a simple paste function
+all_de$SurveyAge <- paste(all_de$Survey,all_de$Age)
+
+#Now you do the same for de_pilw...
+
+#The dplyr package has a range of join functions
+new_de <- inner_join(all_de, de_pilw, by="SurveyAge")
+View(new_de)
+
+#There are a number of other ways to bind columns together
+#They are all part of the dplyr package
+
+#A full join where all the data is retained
+#full_join(dataset_a, dataset_b, by="common column name")
+
+#A right join, matching rows from dataset_a to dataset_b
+#right_join(dataset_a, dataset_b, by="common column name")
+
+#A left join, matching rows from dataset_b to dataset_a
+#left_join(dataset_a, dataset_b, by="common column name")
+
+#Let's look at new_de again...
+View(new_de)
+
+#It could do with a bit of a clean up
+#Let's move and drop some columns
+clean_de <-  new_de[c(-9,-10)]
+View(clean_de)
+
+#Let's reorder too...
+order_de <- clean_de[c(8,1,2,3,4,5,6,7,9:13)]
+
+################
+##CALCULATIONS##
+################
+
+#Let's look at the median and mean values
+median(order_de$EDHIW)
+mean(order_de$EDHIW)
+
+#and take a look at the outliers
+min(order_de$EDHIW)
+max(order_de$EDHIW)
+
+#Now you do the same for PILW...
+
+##################################
+## SOME THINGS TO REMEMBER IN R ##
+##################################
+#Sadly of course, R, does have its quirks 
+#Most of the problems you'll encounter when starting out with R relate to syntax or case issues
+
+#Tables (aka data frame) and column names (aka variable) are case sensitive
+#Commands are also case sensitive
+#As we've just seen package names also need to be in quotation marks
+
+#####################
+## PRACTISING IN R ##
+#####################
+
+#There are plenty of built in datasets to play with in R
+#They can be really useful for practicing and building up confidence
+#To find built in datasets in R try this...
+data()
+#To find out more about the datasets try
+??Cars93
+#You can also create shortcuts to the 
+data(Cars93, package="MASS")
+
+###############################
+## GETTING FURTHER HELP IN R ##
+###############################
+
+#RStudio has a range of great tipsheets
+# www.rstudio.com/resources/cheatsheets/
+#The O'Reilly Cookbook is a helpful resource
+#Hadley Wickham, Chief Scientist at RStudio, is a font of knowledge for all things R - find him on Twitter @hadleywickham
+
+###################
+## KEEP IN TOUCH ##
+###################
+
+#Find me on Twitter @caelainnbarr
+#Or on email caelainn.barr@theguardian.com
